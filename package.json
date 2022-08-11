@@ -2,10 +2,12 @@
   "dependencies": {
     "@nestjs/passport": "^9.0.0",
     "@prisma/client": "^4.2.1",
+    "bcrypt": "^5.0.1",
     "passport": "^0.6.0",
     "passport-local": "^1.0.0"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.0",
     "@types/passport-local": "^1.0.34",
     "prisma": "^4.2.1"
   }
