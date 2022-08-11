@@ -6,9 +6,18 @@ import { AuthController } from './auth.controller';
 import { HashService } from "./hashing/hashing.service";
 import { UserService } from "./user/user.service";
 import { PrismaService } from "./prisma/prisma.service";
+import { JwtModule } from "@nestjs/jwt";
+import { ConfigModule } from "@nestjs/config";
+import { jwtConstants } from "./constants";
 
 @Module({
-    imports: [PassportModule],
+    imports: [
+        ConfigModule.forRoot(),
+        PassportModule,
+        JwtModule.register({
+            secret: jwtConstants.secret,
+            signOptions: { expiresIn: '60s' },
+          }),],
     providers: [AuthService, LocalStrategy, HashService, UserService, PrismaService],
     controllers: [AuthController]
 })
