@@ -5,6 +5,7 @@
     "passport-local": "^1.0.0"
   },
   "devDependencies": {
-    "@types/passport-local": "^1.0.34"
+    "@types/passport-local": "^1.0.34",
+    "prisma": "^4.2.1"
   }
 }
