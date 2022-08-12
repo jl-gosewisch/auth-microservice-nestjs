@@ -23,9 +23,10 @@ export class AuthController {
         return this.authService.createUser(userData);
     }
 
+    @UseGuards(JwtAuthGuard)
     @Post('auth/logout')
-    async logout() {
-        return this.authService.logout()
+    async logout(@Request() req) {
+        return this.authService.logout(req.user.userId)
     }
      
     @Post('auth/refresh')

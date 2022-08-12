@@ -23,9 +23,22 @@ export class AuthService {
   }
 
   async login(user: User) {
-    let payload = {sub: user.id};
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync({sub: user.id}),
+      this.jwtService.signAsync({sub: user.id}, {expiresIn: 60*60*24})
+    ]);
+    const hashedRefreshToken: string = await this.hashingService.hashJWT(refreshToken);
+    await this.usersService.updateUser({
+      where: {
+        id: user.id
+      },
+      data: {
+        hashedRefreshToken
+      }
+    })
     return {
-        access_token: this.jwtService.sign(payload),
+        access_token: accessToken,
+        refresh_token:refreshToken
       }
   }
 
@@ -37,8 +50,22 @@ export class AuthService {
     return this.usersService.user(id)
   }
 
-  async logout() {
-    return null
+  async logout(id: string) {
+    try {
+      this.usersService.updateUser({
+        where: {
+          id
+        },
+        data: {
+          hashedRefreshToken: null
+        }
+      })
+    } catch (err) {
+      // TODO: Implement Error Handling
+    }
+    return {
+      success: true
+    }
   }
 
   async refresh() {

@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import * as argon from "argon2";
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -13,5 +14,13 @@ export class HashService {
     async comparePassword( passwort: string, hash: string) : Promise<boolean> {
         const result = await bcrypt.compare(passwort, hash);
         return result    
+    }
+
+    async hashJWT(jwt: string): Promise<string> {
+        return argon.hash(jwt);
+    }
+
+    async compareRefreshTokenWithHash(hash: string, jwt): Promise<Boolean> {
+        return argon.verify(hash, jwt);
     }
 }
