@@ -8,25 +8,36 @@ import { JwtAuthGuard } from './guards/jwt-auth-guard';
 
 @Controller()
 export class AuthController {
-    constructor( private userService: UserService, private authService: AuthService) {}
+    constructor( private authService: AuthService) {}
 
     @UseGuards(LocalAuthGuard)
-    @Post('auth/login')
+    @Post('auth/local/signin')
     async login(@Request() req) {
-        return this.authService.issueJwtToken(req.user);
+        return this.authService.login(req.user);
     };
 
-    @Post('signup')
+    @Post('auth/local/signup')
     async signupUser(
-        @Body() userData: { email: string; passwort: string },
+        @Body() userData: { email: string; hash: string },
     ): Promise<UserModel> {
-        return this.userService.createUser(userData);
+        return this.authService.createUser(userData);
     }
+
+    @Post('auth/logout')
+    async logout() {
+        return this.authService.logout()
+    }
+     
+    @Post('auth/refresh')
+    async refresh() {
+        return this.authService.refresh()
+    }
+    
 
     @UseGuards(JwtAuthGuard)
     @Get('profile')
     getProfile(@Request() req) {
-      return this.userService.user({id: req.user.userId});
+      return this.authService.testUserReturnRoute({id: req.user.userId});
     }
 }
 
