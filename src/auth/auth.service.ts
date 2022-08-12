@@ -98,8 +98,5 @@ export class AuthService {
       success: true
     }
   }
-
-  async refresh() {
-    return null
-  }
+  
 }

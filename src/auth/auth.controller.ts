@@ -5,6 +5,7 @@ import { User as UserModel } from '@prisma/client';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth-guard';
+import { RefreshTokenGuard } from './guards/jwt-refresh-guard';
 
 @Controller()
 export class AuthController {
@@ -29,9 +30,12 @@ export class AuthController {
         return this.authService.logout(req.user.userId)
     }
      
+    @UseGuards(RefreshTokenGuard)
     @Post('auth/refresh')
-    async refresh() {
-        return this.authService.refresh()
+    async refreshTokens(@Request() req) {
+        const userId = req.user['sub'];
+        const refreshToken = req.user['refreshToken'];
+        return this.authService.refreshTokens(userId, refreshToken);
     }
     
 
