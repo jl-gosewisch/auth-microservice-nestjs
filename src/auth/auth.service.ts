@@ -64,7 +64,7 @@ export class AuthService {
         id: userId
       },
       data: {
-        hashedRefreshToken
+        hashedRefreshToken: hashedRefreshToken
       }
     })
   }
@@ -79,7 +79,8 @@ export class AuthService {
     );
     if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
     const tokens = await this.createTokens(user.id);
-    await this.updateRefreshToken(user.id, tokens.refreshToken);
+    const hashedRefreshToken = await this.hashingService.hashJWT(tokens.refreshToken)
+    await this.updateRefreshToken(userId, hashedRefreshToken);
     return tokens;
   }
   

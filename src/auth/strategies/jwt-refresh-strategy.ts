@@ -15,7 +15,8 @@ export class RefreshTokenStrategy extends PassportStrategy(
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       // Only for local testing
-      secretOrKey: 'test321'
+      secretOrKey: 'test321',
+      passReqToCallback: true,
       /* 
       Proper Way!:
       secretOrKey: configService.get<string>('JWT_REFRESH_TOKEN')
@@ -24,9 +25,9 @@ export class RefreshTokenStrategy extends PassportStrategy(
   }
   private logger = new Logger(RefreshTokenStrategy.name)
 
-  validate(req: Request, payload: any) {
-    this.logger.log('Request:', req)
-    const refreshToken = req
+  validate(request: Request, payload: any) {
+    this.logger.log('Request:', request.get('authorization'))
+    const refreshToken = request
       ?.get('authorization')
       ?.replace('Bearer', '')
       .trim();
@@ -34,7 +35,7 @@ export class RefreshTokenStrategy extends PassportStrategy(
     if (!refreshToken) throw new ForbiddenException('Refresh token malformed');
 
     return {
-      ...payload,
+      userId: payload.sub,
       refreshToken,
     }
   }
