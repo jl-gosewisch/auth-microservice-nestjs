@@ -2,7 +2,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { User, Prisma } from '@prisma/client';
-import { HashService } from '../hashing/hashing.service';
+import { HashService } from '../hashAndCrypto/hashing.service';
 
 
 @Injectable()

@@ -11,8 +11,10 @@ export class AuthController {
 
     @UseGuards(LocalAuthGuard)
     @Post('auth/local/signin')
-    async login(@Request() req) {
-        return this.authService.login(req.user);
+    async login(
+        @Body() userData: { email: string; hash: string },
+    ) {
+        return this.authService.login(userData);
     };
 
     @Post('auth/local/signup')
@@ -32,7 +34,7 @@ export class AuthController {
     @UseGuards(RefreshTokenGuard)
     @Post('auth/refresh')
     async refreshTokens(@Request() req) {
-        return this.authService.refreshTokens(req.user.userId, "blabla");
+        return this.authService.refreshTokens(req.user.userId, req.user.refreshToken);
     }
     
 

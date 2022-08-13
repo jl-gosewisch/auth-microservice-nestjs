@@ -1,8 +1,8 @@
-
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Prisma, User } from '@prisma/client';
-import { HashService } from './hashing/hashing.service';
+import { HashService } from './hashAndCrypto/hashing.service';
 import { UserService } from './user/user.service';
 
 @Injectable()
@@ -10,8 +10,10 @@ export class AuthService {
   constructor(
     private usersService: UserService,
     private hashingService: HashService, 
-    private jwtService:JwtService
+    private jwtService:JwtService,
+    private configService: ConfigService
     ) {}
+  private logger = new Logger(AuthService.name);
 
   async validateUser(email: string, pass: string): Promise<any> {
     const user: User = await this.usersService.user({email});
@@ -22,10 +24,11 @@ export class AuthService {
     return null;
   }
 
-  async login(user: User) {
-    const currentUser = await this.usersService.user({email : user.email});
-    if (!currentUser) throw new BadRequestException('User does not exist');
-    const passwordMatches = this.hashingService.comparePassword(user.hash, currentUser.hash)
+  async login(userData) {
+    const currentUser = await this.usersService.user({email : userData.email})
+    if (!currentUser) throw new BadRequestException('User does not exist')
+    this.logger.log("Incoming Hash:".concat(userData.hash).concat(". Loaded Hash").concat(currentUser.hash))
+    const passwordMatches = this.hashingService.comparePassword(userData.hash, currentUser.hash)
     if (!passwordMatches) throw new BadRequestException('Passwort incorrect')
     const tokens = await this.createTokens(currentUser.id)
     const hashedRefreshToken: string = await this.hashingService.hashJWT(tokens.refreshToken);
@@ -41,13 +44,13 @@ export class AuthService {
   }
 
   async testUserReturnRoute(userId: string) {
-    this.usersService.user({id: userId})
+    return this.usersService.user({id: userId})
   }
 
   async createTokens(userId) {
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync({sub: userId}),
-      this.jwtService.signAsync({sub: userId}, {expiresIn: 60*60*24})
+      this.jwtService.signAsync({sub: userId}, {secret: this.configService.get<string>('JWT_ACCESS_SECRET')}),
+      this.jwtService.signAsync({sub: userId}, {secret: this.configService.get<string>('JWT_REFRESH_SECRET'), expiresIn: 60*60*24})
     ]);
     return {
       accessToken,
