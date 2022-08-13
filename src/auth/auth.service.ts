@@ -40,8 +40,8 @@ export class AuthService {
     return this.usersService.createUser(userData)
   }
 
-  async testUserReturnRoute(id: Prisma.UserWhereUniqueInput) {
-    return this.usersService.user(id)
+  async testUserReturnRoute(userId: string) {
+    return this.usersService.user({id: userId})
   }
 
   async createTokens(userId) {

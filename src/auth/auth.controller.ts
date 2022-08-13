@@ -1,6 +1,4 @@
 import { Controller, Request, Get, Post, UseGuards, Body } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { UserService } from './user/user.service';
 import { User as UserModel } from '@prisma/client';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { AuthService } from './auth.service';
@@ -30,19 +28,18 @@ export class AuthController {
         return this.authService.logout(req.user.userId)
     }
      
+    // TODO: Understand the logic of passport strategies in nest better
     @UseGuards(RefreshTokenGuard)
     @Post('auth/refresh')
     async refreshTokens(@Request() req) {
-        const userId = req.user['sub'];
-        const refreshToken = req.user['refreshToken'];
-        return this.authService.refreshTokens(userId, refreshToken);
+        return this.authService.refreshTokens(req.user.userId, "blabla");
     }
     
 
     @UseGuards(JwtAuthGuard)
     @Get('profile')
     getProfile(@Request() req) {
-      return this.authService.testUserReturnRoute({id: req.user.userId});
+        return this.authService.testUserReturnRoute(req.user.userId);
     }
 }
 
