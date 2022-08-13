@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, HttpException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Prisma, User } from '@prisma/client';
@@ -17,18 +17,18 @@ export class AuthService {
 
   async validateUser(email: string, pass: string): Promise<any> {
     const user: User = await this.usersService.user({email});
-    if(user && await this.hashingService.comparePassword(pass, user.hash)) {
-        const { hash, ...result } = user;
+    if(user && await this.hashingService.comparePassword(pass, user.password)) {
+        const { password, ...result } = user;
         return result;
     }
     return null;
   }
 
-  async login(userData) {
+  async login(userData: Prisma.UserCreateInput) {
     const currentUser = await this.usersService.user({email : userData.email})
     if (!currentUser) throw new BadRequestException('User does not exist')
-    this.logger.log("Incoming Hash:".concat(userData.hash).concat(". Loaded Hash").concat(currentUser.hash))
-    const passwordMatches = this.hashingService.comparePassword(userData.hash, currentUser.hash)
+    this.logger.log("Incoming Hash:".concat(userData.password).concat(". Loaded Hash").concat(currentUser.password))
+    const passwordMatches = this.hashingService.comparePassword(userData.password, currentUser.password)
     if (!passwordMatches) throw new BadRequestException('Passwort incorrect')
     const tokens = await this.createTokens(currentUser.id)
     const hashedRefreshToken: string = await this.hashingService.hashJWT(tokens.refreshToken);

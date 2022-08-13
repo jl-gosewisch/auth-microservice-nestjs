@@ -1,9 +1,10 @@
-import { Controller, Request, Get, Post, UseGuards, Body } from '@nestjs/common';
+import { Controller, Request, Get, Post, UseGuards, Body, HttpException, HttpStatus } from '@nestjs/common';
 import { User as UserModel } from '@prisma/client';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth-guard';
 import { RefreshTokenGuard } from './guards/jwt-refresh-guard';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Controller()
 export class AuthController {
@@ -12,16 +13,18 @@ export class AuthController {
     @UseGuards(LocalAuthGuard)
     @Post('auth/local/signin')
     async login(
-        @Body() userData: { email: string; hash: string },
+        @Body() createUserDto: CreateUserDto,
     ) {
-        return this.authService.login(userData);
+        return this.authService.login(createUserDto);
     };
 
     @Post('auth/local/signup')
     async signupUser(
-        @Body() userData: { email: string; hash: string },
-    ): Promise<UserModel> {
-        return this.authService.createUser(userData);
+        @Body() createUserDto: CreateUserDto,
+    ): Promise<HttpException> {
+        const user = this.authService.createUser(createUserDto);
+        if (!user) throw new HttpException('Internal Server Error: Could not create User', HttpStatus.INTERNAL_SERVER_ERROR);
+        throw new HttpException('User created', HttpStatus.CREATED)
     }
 
     @UseGuards(JwtAuthGuard)
