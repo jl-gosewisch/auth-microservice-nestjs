@@ -41,7 +41,7 @@ export class AuthService {
   }
 
   async testUserReturnRoute(userId: string) {
-    return this.usersService.user({id: userId})
+    this.usersService.user({id: userId})
   }
 
   async createTokens(userId) {
