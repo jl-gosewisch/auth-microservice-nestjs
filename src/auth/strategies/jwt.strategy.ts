@@ -2,6 +2,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import jwtAccessSecretConfig from '../config/jwt-access-secret.config';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -10,12 +11,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      // Only for local testing
-      secretOrKey: 'test123'
-      /* 
-      Proper Way!:
-      secretOrKey: configService.get<string>('JWT_ACCESS_TOKEN')
-      */
+      secretOrKey: jwtAccessSecretConfig().accessSecret
     });
   }
   private logger = new Logger(JwtStrategy.name)

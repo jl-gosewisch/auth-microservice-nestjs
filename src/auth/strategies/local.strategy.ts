@@ -9,7 +9,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(private authService: AuthService) {
     super({
         usernameField: 'email',
-        passwordField: 'hash'
+        passwordField: 'password'
     });
   }
 
@@ -18,6 +18,6 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       throw new UnauthorizedException();
     }
-    return user;
+    return { userId: user.id };
   }
 }

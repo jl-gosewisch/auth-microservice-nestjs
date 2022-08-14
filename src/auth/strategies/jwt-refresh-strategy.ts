@@ -3,6 +3,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Request } from 'express';
 import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import jwtRefreshSecretConfig from '../config/jwt-refresh-secret.config';
 
 @Injectable()
 export class RefreshTokenStrategy extends PassportStrategy(
@@ -14,13 +15,9 @@ export class RefreshTokenStrategy extends PassportStrategy(
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      // Only for local testing
-      secretOrKey: 'test321',
-      passReqToCallback: true,
-      /* 
-      Proper Way!:
-      secretOrKey: configService.get<string>('JWT_REFRESH_TOKEN')
-      */
+      secretOrKey: jwtRefreshSecretConfig().refreshSecret,
+      passReqToCallback: true
+      
     });
   }
   private logger = new Logger(RefreshTokenStrategy.name)

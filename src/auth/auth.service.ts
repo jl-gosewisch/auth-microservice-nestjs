@@ -24,15 +24,10 @@ export class AuthService {
     return null;
   }
 
-  async login(userData: Prisma.UserCreateInput) {
-    const currentUser = await this.usersService.user({email : userData.email})
-    if (!currentUser) throw new BadRequestException('User does not exist')
-    this.logger.log("Incoming Hash:".concat(userData.password).concat(". Loaded Hash").concat(currentUser.password))
-    const passwordMatches = this.hashingService.comparePassword(userData.password, currentUser.password)
-    if (!passwordMatches) throw new BadRequestException('Passwort incorrect')
-    const tokens = await this.createTokens(currentUser.id)
+  async login(userId: string) {
+    const tokens = await this.createTokens(userId)
     const hashedRefreshToken: string = await this.hashingService.hashJWT(tokens.refreshToken);
-    await this.updateRefreshToken(currentUser.id, hashedRefreshToken)
+    await this.updateRefreshToken(userId, hashedRefreshToken)
     return {
         access_token: tokens.accessToken,
         refresh_token: tokens.refreshToken
